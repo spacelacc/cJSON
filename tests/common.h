@@ -23,7 +23,40 @@
 #ifndef CJSON_TESTS_COMMON_H
 #define CJSON_TESTS_COMMON_H
 
-#include "../cJSON.c"
+#include "../cJSON.h"
+
+#define true ((cJSON_bool)1)
+#define false ((cJSON_bool)0)
+
+typedef struct internal_hooks
+{
+    void *(*allocate)(size_t size);
+    void (*deallocate)(void *pointer);
+    void *(*reallocate)(void *pointer, size_t size);
+} internal_hooks;
+extern internal_hooks global_hooks;
+
+typedef struct
+{
+    unsigned char *buffer;
+    size_t length;
+    size_t offset;
+    size_t depth; /* current nesting depth (for formatted printing) */
+    cJSON_bool noalloc;
+    cJSON_bool format; /* is this print a formatted print */
+    internal_hooks hooks;
+} printbuffer;
+
+typedef struct
+{
+    const unsigned char *content;
+    size_t length;
+    size_t offset;
+    size_t depth; /* How deeply nested (in arrays/objects) is the input at the current offset. */
+    internal_hooks hooks;
+} parse_buffer;
+
+extern unsigned char* ensure(printbuffer * const, size_t);
 
 CJSON_PUBLIC(void) reset(cJSON *item);
 CJSON_PUBLIC(char*) read_file(const char *filename);

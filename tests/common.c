@@ -20,6 +20,10 @@
   THE SOFTWARE.
 */
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "common.h"
 
 CJSON_PUBLIC(void) reset(cJSON *item)

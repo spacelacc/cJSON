@@ -20,9 +20,14 @@
   THE SOFTWARE.
 */
 
+#include <string.h>
+
 #include "unity/examples/unity_config.h"
 #include "unity/src/unity.h"
 #include "common.h"
+
+extern cJSON_bool parse_array(cJSON * const, parse_buffer * const);
+extern cJSON_bool print_array(const cJSON * const, printbuffer * const);
 
 static void assert_print_array(const char * const expected, const char * const input)
 {

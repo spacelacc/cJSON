@@ -28,6 +28,9 @@
 #include "unity/src/unity.h"
 #include "common.h"
 
+extern cJSON_bool parse_value(cJSON * const, parse_buffer * const);
+extern cJSON_bool print_value(const cJSON * const, printbuffer * const);
+
 static void assert_print_value(const char *input)
 {
     unsigned char printed[1024];

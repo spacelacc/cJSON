@@ -28,6 +28,8 @@
 #include "unity/src/unity.h"
 #include "common.h"
 
+extern unsigned parse_hex4(const unsigned char * const);
+
 static void parse_hex4_should_parse_all_combinations(void)
 {
     unsigned int number = 0;

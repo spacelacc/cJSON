@@ -41,6 +41,8 @@ static void assert_is_value(cJSON *value_item, int type)
     assert_has_no_string(value_item);
 }
 
+extern cJSON_bool parse_value(cJSON * const, parse_buffer * const);
+
 static void assert_parse_value(const char *string, int type)
 {
     parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };

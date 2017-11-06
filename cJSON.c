@@ -72,7 +72,7 @@ typedef struct {
     const unsigned char *json;
     size_t position;
 } error;
-static error global_error = { NULL, 0 };
+CJSON_PRIVATE(error) global_error = { NULL, 0 };
 
 CJSON_PUBLIC(const char *) cJSON_GetErrorPtr(void)
 {
@@ -93,6 +93,7 @@ CJSON_PUBLIC(const char*) cJSON_Version(void)
 }
 
 /* Case insensitive string comparison, doesn't consider two NULL pointers equal though */
+CJSON_PRIVATE(int) case_insensitive_strcmp(const unsigned char *string1, const unsigned char *string2);
 CJSON_PRIVATE(int) case_insensitive_strcmp(const unsigned char *string1, const unsigned char *string2)
 {
     if ((string1 == NULL) || (string2 == NULL))
@@ -125,14 +126,17 @@ typedef struct internal_hooks
 
 #if defined(_MSC_VER)
 /* work around MSVC error C2322: '...' address of dillimport '...' is not static */
+CJSON_PRIVATE(void*) internal_malloc(size_t size);
 CJSON_PRIVATE(void*) internal_malloc(size_t size)
 {
     return malloc(size);
 }
+CJSON_PRIVATE(void) internal_free(void *pointer);
 CJSON_PRIVATE(void) internal_free(void *pointer)
 {
     free(pointer);
 }
+CJSON_PRIVATE(void*) internal_realloc(void *pointer, size_t size);
 CJSON_PRIVATE(void*) internal_realloc(void *pointer, size_t size)
 {
     return realloc(pointer, size);
@@ -143,8 +147,9 @@ CJSON_PRIVATE(void*) internal_realloc(void *pointer, size_t size)
 #define internal_realloc realloc
 #endif
 
-static internal_hooks global_hooks = { internal_malloc, internal_free, internal_realloc };
+CJSON_PRIVATE(internal_hooks) global_hooks = { internal_malloc, internal_free, internal_realloc };
 
+CJSON_PRIVATE(unsigned char*) cJSON_strdup(const unsigned char* string, const internal_hooks * const hooks);
 CJSON_PRIVATE(unsigned char*) cJSON_strdup(const unsigned char* string, const internal_hooks * const hooks)
 {
     size_t length = 0;
@@ -198,6 +203,7 @@ CJSON_PUBLIC(void) cJSON_InitHooks(cJSON_Hooks* hooks)
 }
 
 /* Internal constructor. */
+CJSON_PRIVATE(cJSON*) cJSON_New_Item(const internal_hooks * const hooks);
 CJSON_PRIVATE(cJSON*) cJSON_New_Item(const internal_hooks * const hooks)
 {
     cJSON* node = (cJSON*)hooks->allocate(sizeof(cJSON));
@@ -234,6 +240,7 @@ CJSON_PUBLIC(void) cJSON_Delete(cJSON *item)
 }
 
 /* get the decimal point character of the current locale */
+CJSON_PRIVATE(unsigned char) get_decimal_point(void);
 CJSON_PRIVATE(unsigned char) get_decimal_point(void)
 {
 #ifdef ENABLE_LOCALES
@@ -262,6 +269,7 @@ typedef struct
 #define buffer_at_offset(buffer) ((buffer)->content + (buffer)->offset)
 
 /* Parse the input text to generate a number, and populate the result into item. */
+CJSON_PRIVATE(cJSON_bool) parse_number(cJSON * const item, parse_buffer * const input_buffer);
 CJSON_PRIVATE(cJSON_bool) parse_number(cJSON * const item, parse_buffer * const input_buffer)
 {
     double number = 0;
@@ -369,6 +377,7 @@ typedef struct
 } printbuffer;
 
 /* realloc printbuffer if necessary to have at least "needed" bytes more */
+CJSON_PRIVATE(unsigned char*) ensure(printbuffer * const p, size_t needed);
 CJSON_PRIVATE(unsigned char*) ensure(printbuffer * const p, size_t needed)
 {
     unsigned char *newbuffer = NULL;
@@ -457,6 +466,7 @@ CJSON_PRIVATE(unsigned char*) ensure(printbuffer * const p, size_t needed)
 }
 
 /* calculate the new length of the string in a printbuffer and update the offset */
+CJSON_PRIVATE(void) update_offset(printbuffer * const buffer);
 CJSON_PRIVATE(void) update_offset(printbuffer * const buffer)
 {
     const unsigned char *buffer_pointer = NULL;
@@ -470,6 +480,7 @@ CJSON_PRIVATE(void) update_offset(printbuffer * const buffer)
 }
 
 /* Render the number nicely from the given item into a string. */
+CJSON_PRIVATE(cJSON_bool) print_number(const cJSON * const item, printbuffer * const output_buffer);
 CJSON_PRIVATE(cJSON_bool) print_number(const cJSON * const item, printbuffer * const output_buffer)
 {
     unsigned char *output_pointer = NULL;
@@ -536,6 +547,7 @@ CJSON_PRIVATE(cJSON_bool) print_number(const cJSON * const item, printbuffer * c
 }
 
 /* parse 4 digit hexadecimal number */
+CJSON_PRIVATE(unsigned) parse_hex4(const unsigned char * const input);
 CJSON_PRIVATE(unsigned) parse_hex4(const unsigned char * const input)
 {
     unsigned int h = 0;
@@ -573,6 +585,7 @@ CJSON_PRIVATE(unsigned) parse_hex4(const unsigned char * const input)
 
 /* converts a UTF-16 literal to UTF-8
  * A literal can be one or two sequences of the form \uXXXX */
+CJSON_PRIVATE(unsigned char) utf16_literal_to_utf8(const unsigned char * const input_pointer, const unsigned char * const input_end, unsigned char **output_pointer);
 CJSON_PRIVATE(unsigned char) utf16_literal_to_utf8(const unsigned char * const input_pointer, const unsigned char * const input_end, unsigned char **output_pointer)
 {
     long unsigned int codepoint = 0;
@@ -694,6 +707,7 @@ fail:
 }
 
 /* Parse the input text into an unescaped cinput, and populate item. */
+CJSON_PRIVATE(cJSON_bool) parse_string(cJSON * const item, parse_buffer * const input_buffer);
 CJSON_PRIVATE(cJSON_bool) parse_string(cJSON * const item, parse_buffer * const input_buffer)
 {
     const unsigned char *input_pointer = buffer_at_offset(input_buffer) + 1;
@@ -823,6 +837,7 @@ fail:
 }
 
 /* Render the cstring provided to an escaped version that can be printed. */
+CJSON_PRIVATE(cJSON_bool) print_string_ptr(const unsigned char * const input, printbuffer * const output_buffer);
 CJSON_PRIVATE(cJSON_bool) print_string_ptr(const unsigned char * const input, printbuffer * const output_buffer)
 {
     const unsigned char *input_pointer = NULL;
@@ -945,6 +960,7 @@ CJSON_PRIVATE(cJSON_bool) print_string_ptr(const unsigned char * const input, pr
 }
 
 /* Invoke print_string_ptr (which is useful) on an item. */
+CJSON_PRIVATE(cJSON_bool) print_string(const cJSON * const item, printbuffer * const p);
 CJSON_PRIVATE(cJSON_bool) print_string(const cJSON * const item, printbuffer * const p)
 {
     return print_string_ptr((unsigned char*)item->valuestring, p);
@@ -959,6 +975,7 @@ CJSON_PRIVATE(cJSON_bool) parse_object(cJSON * const item, parse_buffer * const 
 CJSON_PRIVATE(cJSON_bool) print_object(const cJSON * const item, printbuffer * const output_buffer);
 
 /* Utility to jump whitespace and cr/lf */
+CJSON_PRIVATE(parse_buffer*) buffer_skip_whitespace(parse_buffer * const buffer);
 CJSON_PRIVATE(parse_buffer*) buffer_skip_whitespace(parse_buffer * const buffer)
 {
     if ((buffer == NULL) || (buffer->content == NULL))
@@ -980,6 +997,7 @@ CJSON_PRIVATE(parse_buffer*) buffer_skip_whitespace(parse_buffer * const buffer)
 }
 
 /* skip the UTF-8 BOM (byte order mark) if it is at the beginning of a buffer */
+CJSON_PRIVATE(parse_buffer*) skip_utf8_bom(parse_buffer * const buffer);
 CJSON_PRIVATE(parse_buffer*) skip_utf8_bom(parse_buffer * const buffer)
 {
     if ((buffer == NULL) || (buffer->content == NULL) || (buffer->offset != 0))
@@ -1083,6 +1101,7 @@ CJSON_PUBLIC(cJSON *) cJSON_Parse(const char *value)
 
 #define cjson_min(a, b) ((a < b) ? a : b)
 
+CJSON_PRIVATE(unsigned char*) print(const cJSON * const item, cJSON_bool format, const internal_hooks * const hooks);
 CJSON_PRIVATE(unsigned char*) print(const cJSON * const item, cJSON_bool format, const internal_hooks * const hooks)
 {
     printbuffer buffer[1];
@@ -1741,6 +1760,7 @@ CJSON_PUBLIC(int) cJSON_GetArraySize(const cJSON *array)
     return (int)size;
 }
 
+CJSON_PRIVATE(cJSON*) get_array_item(const cJSON *array, size_t index);
 CJSON_PRIVATE(cJSON*) get_array_item(const cJSON *array, size_t index)
 {
     cJSON *current_child = NULL;
@@ -1770,6 +1790,7 @@ CJSON_PUBLIC(cJSON *) cJSON_GetArrayItem(const cJSON *array, int index)
     return get_array_item(array, (size_t)index);
 }
 
+CJSON_PRIVATE(cJSON*) get_object_item(const cJSON * const object, const char * const name, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) get_object_item(const cJSON * const object, const char * const name, const cJSON_bool case_sensitive)
 {
     cJSON *current_element = NULL;
@@ -1814,6 +1835,7 @@ CJSON_PUBLIC(cJSON_bool) cJSON_HasObjectItem(const cJSON *object, const char *st
 }
 
 /* Utility for array list handling. */
+CJSON_PRIVATE(void) suffix_object(cJSON *prev, cJSON *item);
 CJSON_PRIVATE(void) suffix_object(cJSON *prev, cJSON *item)
 {
     prev->next = item;
@@ -1821,6 +1843,7 @@ CJSON_PRIVATE(void) suffix_object(cJSON *prev, cJSON *item)
 }
 
 /* Utility for handling references. */
+CJSON_PRIVATE(cJSON*) create_reference(const cJSON *item, const internal_hooks * const hooks);
 CJSON_PRIVATE(cJSON*) create_reference(const cJSON *item, const internal_hooks * const hooks)
 {
     cJSON *reference = NULL;
@@ -2073,6 +2096,7 @@ CJSON_PUBLIC(void) cJSON_ReplaceItemInArray(cJSON *array, int which, cJSON *newi
     cJSON_ReplaceItemViaPointer(array, get_array_item(array, (size_t)which), newitem);
 }
 
+CJSON_PRIVATE(cJSON_bool) replace_item_in_object(cJSON *object, const char *string, cJSON *replacement, cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON_bool) replace_item_in_object(cJSON *object, const char *string, cJSON *replacement, cJSON_bool case_sensitive)
 {
     if ((replacement == NULL) || (string == NULL))

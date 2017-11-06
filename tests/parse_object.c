@@ -50,6 +50,8 @@ static void assert_is_child(cJSON *child_item, const char *name, int type)
     TEST_ASSERT_BITS(0xFF, type, child_item->type);
 }
 
+extern cJSON_bool parse_object(cJSON * const, parse_buffer * const);
+
 static void assert_not_object(const char *json)
 {
     parse_buffer parsebuffer = { 0, 0, 0, 0, { 0, 0, 0 } };

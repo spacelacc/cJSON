@@ -59,6 +59,7 @@
 #define true ((cJSON_bool)1)
 #define false ((cJSON_bool)0)
 
+CJSON_PRIVATE(unsigned char*) cJSONUtils_strdup(const unsigned char* const string);
 CJSON_PRIVATE(unsigned char*) cJSONUtils_strdup(const unsigned char* const string)
 {
     size_t length = 0;
@@ -76,6 +77,7 @@ CJSON_PRIVATE(unsigned char*) cJSONUtils_strdup(const unsigned char* const strin
 }
 
 /* string comparison which doesn't consider NULL pointers equal */
+CJSON_PRIVATE(int) compare_strings(const unsigned char *string1, const unsigned char *string2, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(int) compare_strings(const unsigned char *string1, const unsigned char *string2, const cJSON_bool case_sensitive)
 {
     if ((string1 == NULL) || (string2 == NULL))
@@ -105,6 +107,7 @@ CJSON_PRIVATE(int) compare_strings(const unsigned char *string1, const unsigned 
 }
 
 /* Compare the next path element of two JSON pointers, two NULL pointers are considered unequal: */
+CJSON_PRIVATE(cJSON_bool) compare_pointers(const unsigned char *name, const unsigned char *pointer, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON_bool) compare_pointers(const unsigned char *name, const unsigned char *pointer, const cJSON_bool case_sensitive)
 {
     if ((name == NULL) || (pointer == NULL))
@@ -142,6 +145,7 @@ CJSON_PRIVATE(cJSON_bool) compare_pointers(const unsigned char *name, const unsi
 }
 
 /* calculate the length of a string if encoded as JSON pointer with ~0 and ~1 escape sequences */
+CJSON_PRIVATE(size_t) pointer_encoded_length(const unsigned char *string);
 CJSON_PRIVATE(size_t) pointer_encoded_length(const unsigned char *string)
 {
     size_t length;
@@ -158,6 +162,7 @@ CJSON_PRIVATE(size_t) pointer_encoded_length(const unsigned char *string)
 }
 
 /* copy a string while escaping '~' and '/' with ~0 and ~1 JSON pointer escape codes */
+CJSON_PRIVATE(void) encode_string_as_pointer(unsigned char *destination, const unsigned char *source);
 CJSON_PRIVATE(void) encode_string_as_pointer(unsigned char *destination, const unsigned char *source)
 {
     for (; source[0] != '\0'; (void)source++, destination++)
@@ -245,6 +250,7 @@ CJSON_PUBLIC(char *) cJSONUtils_FindPointerFromObjectTo(const cJSON * const obje
 }
 
 /* non broken version of cJSON_GetArrayItem */
+CJSON_PRIVATE(cJSON*) get_array_item(const cJSON *array, size_t item);
 CJSON_PRIVATE(cJSON*) get_array_item(const cJSON *array, size_t item)
 {
     cJSON *child = array ? array->child : NULL;
@@ -257,6 +263,7 @@ CJSON_PRIVATE(cJSON*) get_array_item(const cJSON *array, size_t item)
     return child;
 }
 
+CJSON_PRIVATE(cJSON_bool) decode_array_index_from_pointer(const unsigned char * const pointer, size_t * const index);
 CJSON_PRIVATE(cJSON_bool) decode_array_index_from_pointer(const unsigned char * const pointer, size_t * const index)
 {
     size_t parsed_index = 0;
@@ -284,6 +291,7 @@ CJSON_PRIVATE(cJSON_bool) decode_array_index_from_pointer(const unsigned char * 
     return 1;
 }
 
+CJSON_PRIVATE(cJSON*) get_item_from_pointer(cJSON * const object, const char * pointer, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) get_item_from_pointer(cJSON * const object, const char * pointer, const cJSON_bool case_sensitive)
 {
     cJSON *current_element = object;
@@ -342,6 +350,7 @@ CJSON_PUBLIC(cJSON *) cJSONUtils_GetPointerCaseSensitive(cJSON * const object, c
 }
 
 /* JSON Patch implementation. */
+CJSON_PRIVATE(void) decode_pointer_inplace(unsigned char *string);
 CJSON_PRIVATE(void) decode_pointer_inplace(unsigned char *string)
 {
     unsigned char *decoded_string = string;
@@ -376,6 +385,7 @@ CJSON_PRIVATE(void) decode_pointer_inplace(unsigned char *string)
 }
 
 /* non-broken cJSON_DetachItemFromArray */
+CJSON_PRIVATE(cJSON*) detach_item_from_array(cJSON *array, size_t which);
 CJSON_PRIVATE(cJSON*) detach_item_from_array(cJSON *array, size_t which)
 {
     cJSON *c = array->child;
@@ -409,6 +419,7 @@ CJSON_PRIVATE(cJSON*) detach_item_from_array(cJSON *array, size_t which)
 }
 
 /* detach an item at the given path */
+CJSON_PRIVATE(cJSON*) detach_path(cJSON *object, const unsigned char *path, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) detach_path(cJSON *object, const unsigned char *path, const cJSON_bool case_sensitive)
 {
     unsigned char *parent_pointer = NULL;
@@ -463,6 +474,7 @@ cleanup:
 }
 
 /* sort lists using mergesort */
+CJSON_PRIVATE(cJSON*) sort_list(cJSON *list, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) sort_list(cJSON *list, const cJSON_bool case_sensitive)
 {
     cJSON *first = list;
@@ -573,6 +585,7 @@ CJSON_PRIVATE(cJSON*) sort_list(cJSON *list, const cJSON_bool case_sensitive)
     return result;
 }
 
+CJSON_PRIVATE(void) sort_object(cJSON * const object, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(void) sort_object(cJSON * const object, const cJSON_bool case_sensitive)
 {
     if (object == NULL)
@@ -582,6 +595,7 @@ CJSON_PRIVATE(void) sort_object(cJSON * const object, const cJSON_bool case_sens
     object->child = sort_list(object->child, case_sensitive);
 }
 
+CJSON_PRIVATE(cJSON_bool) compare_json(cJSON *a, cJSON *b, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON_bool) compare_json(cJSON *a, cJSON *b, const cJSON_bool case_sensitive)
 {
     if ((a == NULL) || (b == NULL) || ((a->type & 0xFF) != (b->type & 0xFF)))
@@ -671,6 +685,7 @@ CJSON_PRIVATE(cJSON_bool) compare_json(cJSON *a, cJSON *b, const cJSON_bool case
 }
 
 /* non broken version of cJSON_InsertItemInArray */
+CJSON_PRIVATE(cJSON_bool) insert_item_in_array(cJSON *array, size_t which, cJSON *newitem);
 CJSON_PRIVATE(cJSON_bool) insert_item_in_array(cJSON *array, size_t which, cJSON *newitem)
 {
     cJSON *child = array->child;
@@ -708,6 +723,7 @@ CJSON_PRIVATE(cJSON_bool) insert_item_in_array(cJSON *array, size_t which, cJSON
     return 1;
 }
 
+CJSON_PRIVATE(cJSON*) get_object_item(const cJSON * const object, const char* name, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) get_object_item(const cJSON * const object, const char* name, const cJSON_bool case_sensitive)
 {
     if (case_sensitive)
@@ -720,6 +736,7 @@ CJSON_PRIVATE(cJSON*) get_object_item(const cJSON * const object, const char* na
 
 enum patch_operation { INVALID, ADD, REMOVE, REPLACE, MOVE, COPY, TEST };
 
+CJSON_PRIVATE(enum patch_operation) decode_patch_operation(const cJSON * const patch, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(enum patch_operation) decode_patch_operation(const cJSON * const patch, const cJSON_bool case_sensitive)
 {
     cJSON *operation = get_object_item(patch, "op", case_sensitive);
@@ -762,6 +779,7 @@ CJSON_PRIVATE(enum patch_operation) decode_patch_operation(const cJSON * const p
 }
 
 /* overwrite and existing item with another one and free resources on the way */
+CJSON_PRIVATE(void) overwrite_item(cJSON * const root, const cJSON replacement);
 CJSON_PRIVATE(void) overwrite_item(cJSON * const root, const cJSON replacement)
 {
     if (root == NULL)
@@ -785,6 +803,7 @@ CJSON_PRIVATE(void) overwrite_item(cJSON * const root, const cJSON replacement)
     memcpy(root, &replacement, sizeof(cJSON));
 }
 
+CJSON_PRIVATE(int) apply_patch(cJSON *object, const cJSON *patch, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(int) apply_patch(cJSON *object, const cJSON *patch, const cJSON_bool case_sensitive)
 {
     cJSON *path = NULL;
@@ -1066,6 +1085,7 @@ CJSON_PUBLIC(int) cJSONUtils_ApplyPatchesCaseSensitive(cJSON * const object, con
     return 0;
 }
 
+CJSON_PRIVATE(void) compose_patch(cJSON * const patches, const unsigned char * const operation, const unsigned char * const path, const unsigned char *suffix, const cJSON * const value);
 CJSON_PRIVATE(void) compose_patch(cJSON * const patches, const unsigned char * const operation, const unsigned char * const path, const unsigned char *suffix, const cJSON * const value)
 {
     cJSON *patch = NULL;
@@ -1111,6 +1131,7 @@ CJSON_PUBLIC(void) cJSONUtils_AddPatchToArray(cJSON * const array, const char * 
     compose_patch(array, (const unsigned char*)operation, (const unsigned char*)path, NULL, value);
 }
 
+CJSON_PRIVATE(void) create_patches(cJSON * const patches, const unsigned char * const path, cJSON * const from, cJSON * const to, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(void) create_patches(cJSON * const patches, const unsigned char * const path, cJSON * const from, cJSON * const to, const cJSON_bool case_sensitive)
 {
     if ((from == NULL) || (to == NULL))
@@ -1291,6 +1312,7 @@ CJSON_PUBLIC(void) cJSONUtils_SortObjectCaseSensitive(cJSON * const object)
     sort_object(object, true);
 }
 
+CJSON_PRIVATE(cJSON*) merge_patch(cJSON *target, const cJSON * const patch, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) merge_patch(cJSON *target, const cJSON * const patch, const cJSON_bool case_sensitive)
 {
     cJSON *patch_child = NULL;
@@ -1360,6 +1382,7 @@ CJSON_PUBLIC(cJSON *) cJSONUtils_MergePatchCaseSensitive(cJSON *target, const cJ
     return merge_patch(target, patch, true);
 }
 
+CJSON_PRIVATE(cJSON*) generate_merge_patch(cJSON * const from, cJSON * const to, const cJSON_bool case_sensitive);
 CJSON_PRIVATE(cJSON*) generate_merge_patch(cJSON * const from, cJSON * const to, const cJSON_bool case_sensitive)
 {
     cJSON *from_child = NULL;

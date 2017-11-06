@@ -1,5 +1,5 @@
 if(ENABLE_CJSON_TEST)
-    add_library(unity unity/src/unity.c)
+    add_library(unity SHARED unity/src/unity.c)
 
     # Disable -Werror for Unity
     if (FLAG_SUPPORTED_Werror)
@@ -57,7 +57,14 @@ if(ENABLE_CJSON_TEST)
         compare_tests
     )
 
-    add_library(test-common common.c)
+    add_library(private_cjson SHARED ../cJSON.c)
+    target_compile_definitions(private_cjson PRIVATE CJSON_EXPORT_PRIVATE_SYMBOLS)
+    if (ENABLE_CJSON_UTILS)
+        add_library(private_cjson_utils SHARED ../cJSON_Utils.c)
+        target_compile_definitions(private_cjson_utils PRIVATE CJSON_EXPORT_PRIVATE_SYMBOLS)
+    endif()
+    add_library(test-common SHARED common.c)
+    target_link_libraries(test-common private_cjson)
 
     option(ENABLE_VALGRIND OFF "Enable the valgrind memory checker for the tests.")
     if (ENABLE_VALGRIND)

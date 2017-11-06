@@ -42,6 +42,8 @@ static void assert_is_array(cJSON *array_item)
     assert_has_no_string(array_item);
 }
 
+extern cJSON_bool parse_array(cJSON * const, parse_buffer * const);
+
 static void assert_not_array(const char *json)
 {
     parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };

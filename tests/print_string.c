@@ -24,6 +24,8 @@
 #include "unity/src/unity.h"
 #include "common.h"
 
+extern cJSON_bool print_string_ptr(const unsigned char * const, printbuffer * const);
+
 static void assert_print_string(const char *expected, const char *input)
 {
     unsigned char printed[1024];

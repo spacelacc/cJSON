@@ -43,6 +43,8 @@ static void assert_is_number(cJSON *number_item)
     assert_has_no_string(number_item);
 }
 
+extern cJSON_bool parse_number(cJSON * const, parse_buffer * const);
+
 static void assert_parse_number(const char *string, int integer, double real)
 {
     parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };

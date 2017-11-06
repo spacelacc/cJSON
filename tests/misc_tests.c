@@ -426,6 +426,8 @@ static void ensure_should_fail_on_failed_realloc(void)
     TEST_ASSERT_NULL_MESSAGE(ensure(&buffer, 200), "Ensure didn't fail with failing realloc.");
 }
 
+extern parse_buffer* skip_utf8_bom(parse_buffer * const);
+
 static void skip_utf8_bom_should_skip_bom(void)
 {
     const unsigned char string[] = "\xEF\xBB\xBF{}";
