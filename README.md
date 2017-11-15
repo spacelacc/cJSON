@@ -9,6 +9,7 @@ Ultralightweight JSON parser in ANSI C.
   * [Building](#building)
   * [Including cJSON](#including-cjson)
   * [Data Structure](#data-structure)
+  * [Working with the data structure](#working-with-the-data-structure)
   * [Parsing JSON](#parsing-json)
   * [Printing JSON](#printing-json)
   * [Some JSON](#some-json)
@@ -163,6 +164,13 @@ The type can be one of the following:
 Additionally there are the following two flags:
 * `cJSON_IsReference`: Specifies that the object that `child` points to is not owned by this object, it is only a reference. So `cJSON_Delete` and other functions will only deallocated this object, not it's children.
 * `cJSON_StringIsConst`: This means that `valuestring` points to a constant string. This means that `cJSON_Delete` and other functions will not try to deallocate `valuestring`.
+
+### Working with the data structure
+
+For every value type there is `cJSON_Create...` function that can be used to create an object of that type.
+All of these will allocate a `cJSON` that can laber be deleted with `cJSON_Delete`.
+
+
 
 ### Parsing JSON
 
