@@ -226,7 +226,7 @@ CJSON_PUBLIC(void) cJSON_Delete(cJSON *item)
         {
             global_hooks.deallocate(item->valuestring);
         }
-        if (!(item->type & cJSON_StringIsConst) && (item->string != NULL))
+        if (!(item->type & cJSON_KeyIsReference) && (item->string != NULL))
         {
             global_hooks.deallocate(item->string);
         }
@@ -1881,8 +1881,8 @@ CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSO
 
     /* call cJSON_AddItemToObjectCS for code reuse */
     cJSON_AddItemToObjectCS(object, (char*)cJSON_strdup((const unsigned char*)string, &global_hooks), item);
-    /* remove cJSON_StringIsConst flag */
-    item->type &= ~cJSON_StringIsConst;
+    /* remove cJSON_KeyIsReference flag */
+    item->type &= ~cJSON_KeyIsReference;
 }
 
 #if defined(__clang__) || (defined(__GNUC__)  && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 5))))
@@ -1899,12 +1899,12 @@ CJSON_PUBLIC(void) cJSON_AddItemToObjectCS(cJSON *object, const char *string, cJ
     {
         return;
     }
-    if (!(item->type & cJSON_StringIsConst) && item->string)
+    if (!(item->type & cJSON_KeyIsReference) && item->string)
     {
         global_hooks.deallocate(item->string);
     }
     item->string = (char*)string;
-    item->type |= cJSON_StringIsConst;
+    item->type |= cJSON_KeyIsReference;
     cJSON_AddItemToArray(object, item);
 }
 #if defined(__clang__) || (defined(__GNUC__)  && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 5))))
@@ -2083,12 +2083,12 @@ static cJSON_bool replace_item_in_object(cJSON *object, const char *string, cJSO
     }
 
     /* replace the name in the replacement */
-    if (!(replacement->type & cJSON_StringIsConst) && (replacement->string != NULL))
+    if (!(replacement->type & cJSON_KeyIsReference) && (replacement->string != NULL))
     {
         cJSON_free(replacement->string);
     }
     replacement->string = (char*)cJSON_strdup((const unsigned char*)string, &global_hooks);
-    replacement->type &= ~cJSON_StringIsConst;
+    replacement->type &= ~cJSON_KeyIsReference;
 
     cJSON_ReplaceItemViaPointer(object, get_object_item(object, string, case_sensitive), replacement);
 
@@ -2409,7 +2409,7 @@ CJSON_PUBLIC(cJSON *) cJSON_Duplicate(const cJSON *item, cJSON_bool recurse)
     }
     if (item->string)
     {
-        newitem->string = (item->type&cJSON_StringIsConst) ? item->string : (char*)cJSON_strdup((unsigned char*)item->string, &global_hooks);
+        newitem->string = (item->type & cJSON_KeyIsReference) ? item->string : (char*)cJSON_strdup((unsigned char*)item->string, &global_hooks);
         if (!newitem->string)
         {
             goto fail;

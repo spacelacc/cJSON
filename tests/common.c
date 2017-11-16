@@ -32,7 +32,7 @@ CJSON_PUBLIC(void) reset(cJSON *item)
     {
         global_hooks.deallocate(item->valuestring);
     }
-    if ((item->string != NULL) && !(item->type & cJSON_StringIsConst))
+    if ((item->string != NULL) && !(item->type & cJSON_KeyIsReference))
     {
         global_hooks.deallocate(item->string);
     }

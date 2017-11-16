@@ -47,7 +47,9 @@ extern "C"
 #define cJSON_Raw    (1 << 7) /* raw json */
 
 #define cJSON_IsReference (1 << 8)
-#define cJSON_StringIsConst (1 << 9)
+#define cJSON_KeyIsReference (1 << 9)
+/* DEPRECATED, USE cJSON_KeyIsReference instead */
+#define cJSON_StringIsConst cJSON_KeyIsReference
 
 /* The cJSON structure: */
 typedef struct cJSON
@@ -202,7 +204,7 @@ CJSON_PUBLIC(cJSON *) cJSON_CreateStringArray(const char **strings, int count);
 CJSON_PUBLIC(void) cJSON_AddItemToArray(cJSON *array, cJSON *item);
 CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item);
 /* Use this when string is definitely const (i.e. a literal, or as good as), and will definitely survive the cJSON object.
- * WARNING: When this function was used, make sure to always check that (item->type & cJSON_StringIsConst) is zero before
+ * WARNING: When this function was used, make sure to always check that (item->type & cJSON_KeyIsReference) is zero before
  * writing to `item->string` */
 CJSON_PUBLIC(void) cJSON_AddItemToObjectCS(cJSON *object, const char *string, cJSON *item);
 /* Append reference to item to the specified array/object. Use this when you want to add an existing cJSON to a new cJSON, but don't want to corrupt your existing cJSON. */
